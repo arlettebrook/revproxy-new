@@ -5705,7 +5705,575 @@ function gf(o = {}, e = {}) {
     });
   }
   function c(f, m = $e(f)) {
-    const p = it(f), g = m.ok ? "" : `<div class="landing-banner"><div class="landing-banner-title">系统未初始化</div><div class="landing-banner-text">缺少关键环境变量：${m.missing.map((_) => Te(_)).join("、")}</div></div>`, h = `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="/favicon.ico" sizes="any"><title>Emby Proxy V19.6</title>${e.LANDING_PAGE_STYLE_HTML}</head><body><main class="landing-shell"><section class="landing-card"><div class="landing-grid"><div class="landing-primary">${g}<div class="landing-pill">Headless Edge Relay</div><h1 class="landing-title">Emby Proxy V19.6</h1><p class="landing-text">为了极致优化视频代理性能，根路径默认只保留无头中继与说明壳；真正的管理台入口固定收口到 <span class="landing-highlight">${Te(p)}</span>，并由 Worker 读取随部署发布或已上传的 <code>index.html</code> 返回。</p><div class="landing-actions"><a href="${Te(p)}" class="landing-btn landing-btn-primary">访问 ${Te(p)}</a><a href="https://github.com/axuitomo/CF-EMBY-PROXY-UI" target="_blank" rel="noopener noreferrer" class="landing-btn landing-btn-secondary">查看项目说明</a></div></div><div class="landing-side"><div class="landing-notes"><div class="landing-notes-title">Routing Notes</div><ul class="landing-note-list"><li>根路径仅提供静态说明页，不承载实时配置数据。</li><li><code>${Te(p)}</code> 只负责返回管理台壳与 bootstrap，动态数据继续走 <code>POST ${Te(p)}</code> API。</li><li>正式真相源固定为 <code>frontend/</code>、<code>worker.js</code> 与 <code>worker.md</code>。</li><li>媒体代理、日志与 KV / D1 逻辑保持原 Worker 主链路不变。</li></ul></div></div></div></section></main></body></html>`, y = new Headers({
+    const p = it(f), g = m.ok ? "" : `<div class="landing-banner"><div class="landing-banner-title">系统未初始化</div><div class="landing-banner-text">缺少关键环境变量：${m.missing.map((_) => Te(_)).join("、")}</div></div>`, h = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>反代延迟测试</title>
+<!-- 预连接：页面加载即提前建立TCP+TLS连接，消除首次握手开销 -->
+<link rel="preconnect" href="https://lyra.us.ci">
+<link rel="dns-prefetch" href="https://lyra.us.ci">
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: radial-gradient(1200px 600px at 50% -10%, #1e293b 0%, #0f172a 60%, #020617 100%);
+    color: #f1f5f9;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.card {
+    width: 100%;
+    max-width: 380px;
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 20px;
+    padding: 36px 30px;
+    text-align: center;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(71, 85, 105, 0.6);
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.4), transparent);
+}
+
+h2 {
+    margin: 0 0 28px;
+    font-size: 20px;
+    font-weight: 600;
+    color: #e2e8f0;
+    letter-spacing: 0.3px;
+}
+
+/* ========== 核心：平均延迟（突出展示） ========== */
+.avg-latency {
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.avg-latency .latency-label {
+    font-size: 14px;
+    color: #94a3b8;
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+}
+
+.avg-latency .latency-value {
+    font-size: 68px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+    line-height: 1;
+    letter-spacing: -2px;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #60a5fa, #22d3ee);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 20px rgba(96, 165, 250, 0.3));
+    display: inline-block;
+}
+
+.avg-latency.success .latency-value {
+    background: linear-gradient(135deg, #22c55e, #4ade80);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 20px rgba(34, 197, 94, 0.4));
+}
+
+.avg-latency.warning .latency-value {
+    background: linear-gradient(135deg, #eab308, #facc15);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 20px rgba(234, 179, 8, 0.4));
+}
+
+.avg-latency.danger .latency-value {
+    background: linear-gradient(135deg, #ef4444, #f87171);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.4));
+}
+
+.avg-latency.muted .latency-value {
+    background: #64748b;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: none;
+}
+
+.avg-latency .latency-value.update {
+    transform: scale(1.06);
+}
+
+/* ========== 本次延迟（次要展示） ========== */
+.current-latency {
+    font-size: 28px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+    margin-bottom: 24px;
+    transition: color 0.3s ease;
+}
+
+.current-latency .current-label {
+    font-size: 14px;
+    color: #94a3b8;
+    font-weight: 400;
+    margin-right: 4px;
+}
+
+.current-latency.success .current-value { color: #22c55e; }
+.current-latency.warning .current-value { color: #eab308; }
+.current-latency.danger .current-value { color: #ef4444; }
+.current-latency.muted .current-value { color: #64748b; }
+
+.current-latency .current-value {
+    display: inline-block;
+    transition: transform 0.2s ease;
+}
+
+.current-latency .current-value.update {
+    transform: scale(1.05);
+}
+
+/* 进度条 */
+.progress-container {
+    width: 100%;
+    height: 6px;
+    background: rgba(51, 65, 85, 0.6);
+    border-radius: 999px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    border-radius: 999px;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stats {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 14px;
+    color: #94a3b8;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+}
+
+.stats-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 4px;
+}
+
+.status {
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(51, 65, 85, 0.6);
+    font-size: 14px;
+    transition: color 0.25s ease;
+    min-height: 20px;
+}
+
+.status.normal { color: #22c55e; }
+.status.error { color: #ef4444; }
+.status.loading { color: #64748b; }
+
+.status.loading::after {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    text-align: left;
+    animation: dots 1.4s infinite step-start;
+}
+
+@keyframes dots {
+    0%   { content: ""; }
+    25%  { content: "."; }
+    50%  { content: ".."; }
+    75%  { content: "..."; }
+    100% { content: ""; }
+}
+
+.test-btn {
+    margin-top: 20px;
+    width: 100%;
+    padding: 13px 0;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+}
+
+.test-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.test-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.test-btn:disabled {
+    background: #475569;
+    cursor: not-allowed;
+    opacity: 0.7;
+    box-shadow: none;
+}
+
+/* 醒目提示条 */
+.tip {
+    margin-top: 22px;
+    padding: 12px 14px;
+    background: rgba(234, 179, 8, 0.08);
+    border: 1px solid rgba(234, 179, 8, 0.25);
+    border-left: 4px solid #eab308;
+    border-radius: 10px;
+    font-size: 13px;
+    color: #fde68a;
+    line-height: 1.6;
+    text-align: left;
+}
+
+@media (max-width: 400px) {
+    .card {
+        padding: 30px 22px;
+    }
+    .avg-latency .latency-value {
+        font-size: 56px;
+    }
+    .current-latency {
+        font-size: 24px;
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+    <h2>反代延迟测试</h2>
+    
+    <!-- 核心视觉：平均延迟 -->
+    <div class="avg-latency muted" id="avgLatency">
+        <div class="latency-label">平均延迟</div>
+        <div class="latency-value" id="avgValue">-- ms</div>
+    </div>
+    
+    <!-- 单次实时延迟（辅助） -->
+    <div class="current-latency muted" id="currentLatency">
+        <span class="current-label">本次</span>
+        <span class="current-value" id="currentValue">-- ms</span>
+    </div>
+    
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+    
+    <div class="stats">
+        <div class="stats-row">
+            <span>最低：<span id="min">--</span> ms</span>
+            <span>最高：<span id="max">--</span> ms</span>
+        </div>
+        <div class="stats-row">
+            <span>成功率：<span id="successRate">--</span>%</span>
+            <span>已测：<span id="doneCount">0</span>/<span id="totalCount">5</span> 次</span>
+        </div>
+    </div>
+    
+    <div class="status loading" id="status">正在初始化</div>
+    <button id="startBtn" class="test-btn" disabled>重新测试</button>
+    
+    <!-- 醒目提示文案 -->
+    <div class="tip">为获得最佳体验，请使用不同的网络环境进行测试，延迟较高证明该反代并不适用于你。</div>
+</div>
+
+<script>
+// 配置参数（保持原有默认值不变）
+const TARGET_URL = window.location.origin;
+const TEST_INTERVAL = 1000; // 两次测试间隔（毫秒）
+const MAX_HISTORY = 20;
+const MAX_TEST_COUNT = 5;   // 单次测试总次数
+const REQUEST_TIMEOUT = 8000; // 请求超时时间（毫秒）
+
+// DOM 元素
+const avgLatencyEl = document.getElementById("avgLatency");
+const avgValueEl = document.getElementById("avgValue");
+const currentLatencyEl = document.getElementById("currentLatency");
+const currentValueEl = document.getElementById("currentValue");
+const minEl = document.getElementById("min");
+const maxEl = document.getElementById("max");
+const statusEl = document.getElementById("status");
+const startBtn = document.getElementById("startBtn");
+const progressBar = document.getElementById("progressBar");
+const successRateEl = document.getElementById("successRate");
+const doneCountEl = document.getElementById("doneCount");
+const totalCountEl = document.getElementById("totalCount");
+
+// 状态变量
+let history = [];
+let timerId = null;
+let isTesting = false;
+let isPageVisible = !document.hidden;
+let currentTestCount = 0;
+let successCount = 0;
+let abortController = null;
+
+// 初始化总数显示
+totalCountEl.textContent = MAX_TEST_COUNT;
+
+// 根据延迟值匹配状态色
+function getLatencyClass(ms) {
+    if (ms < 100) return "success";
+    if (ms < 300) return "warning";
+    return "danger";
+}
+
+// 更新统计数据
+function updateStats() {
+    if (history.length === 0) {
+        avgValueEl.textContent = "-- ms";
+        avgLatencyEl.className = "avg-latency muted";
+        minEl.textContent = "--";
+        maxEl.textContent = "--";
+        return;
+    }
+    const sum = history.reduce(function(a, b) { return a + b; }, 0);
+    const avg = Math.round(sum / history.length);
+    
+    avgValueEl.textContent = avg + " ms";
+    avgLatencyEl.className = "avg-latency " + getLatencyClass(avg);
+    avgValueEl.classList.add("update");
+    setTimeout(() => avgValueEl.classList.remove("update"), 200);
+
+    minEl.textContent = Math.min.apply(null, history);
+    maxEl.textContent = Math.max.apply(null, history);
+}
+
+// 更新进度条与计数
+function updateProgress() {
+    const percent = Math.min(100, (currentTestCount / MAX_TEST_COUNT) * 100);
+    progressBar.style.width = percent + "%";
+    doneCountEl.textContent = currentTestCount;
+    
+    if (currentTestCount === 0) {
+        successRateEl.textContent = "--";
+    } else {
+        const rate = Math.round((successCount / currentTestCount) * 100);
+        successRateEl.textContent = rate;
+    }
+}
+
+/**
+ * 连接预热：不计入统计，仅用于建立TCP/TLS连接
+ * 消除首次请求的握手开销，避免第一次测试数值虚高
+ */
+async function warmupConnection() {
+    statusEl.className = "status loading";
+    statusEl.textContent = "正在预热连接";
+
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+        await fetch(TARGET_URL + "?t=" + Date.now() + "&warmup=1", {
+            cache: "no-store",
+            mode: "no-cors",
+            method: "GET",
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+    } catch (err) {
+        // 预热失败不影响正式测试流程
+    }
+}
+
+// 单次延迟测试
+async function runTest() {
+    if (isTesting) return;
+    isTesting = true;
+
+    statusEl.className = "status loading";
+    statusEl.textContent = "测试中（第" + (currentTestCount + 1) + "/" + MAX_TEST_COUNT + "次）";
+
+    if (abortController) {
+        abortController.abort();
+    }
+    abortController = new AbortController();
+    const timeoutId = setTimeout(() => abortController.abort(), REQUEST_TIMEOUT);
+
+    try {
+        const startTime = performance.now();
+        await fetch(TARGET_URL + "?t=" + Date.now() + "&r=" + Math.random().toString(36).slice(2), {
+            cache: "no-store",
+            mode: "no-cors",
+            method: "GET",
+            signal: abortController.signal
+        });
+        const latency = Math.round(performance.now() - startTime);
+
+        history.push(latency);
+        if (history.length > MAX_HISTORY) history.shift();
+        successCount++;
+
+        currentLatencyEl.className = "current-latency " + getLatencyClass(latency);
+        currentValueEl.textContent = latency + " ms";
+        currentValueEl.classList.add("update");
+        setTimeout(() => currentValueEl.classList.remove("update"), 200);
+
+        updateStats();
+        updateProgress();
+
+        statusEl.className = "status normal";
+        statusEl.textContent = "连接正常";
+
+    } catch (err) {
+        currentLatencyEl.className = "current-latency danger";
+        currentValueEl.textContent = "失败";
+        currentValueEl.classList.add("update");
+        setTimeout(() => currentValueEl.classList.remove("update"), 200);
+        
+        updateProgress();
+        
+        statusEl.className = "status error";
+        if (err.name === "AbortError") {
+            statusEl.textContent = "请求超时，节点不可达";
+        } else {
+            statusEl.textContent = "节点不可达或请求被拦截";
+        }
+    } finally {
+        clearTimeout(timeoutId);
+        isTesting = false;
+        currentTestCount++;
+        updateProgress();
+    }
+}
+
+// 串行调度
+function scheduleNextTest() {
+    if (timerId) {
+        clearTimeout(timerId);
+        timerId = null;
+    }
+
+    if (currentTestCount >= MAX_TEST_COUNT) {
+        statusEl.className = "status normal";
+        statusEl.textContent = "测试完成（共" + MAX_TEST_COUNT + "次）";
+        startBtn.disabled = false;
+        return;
+    }
+
+    if (isPageVisible) {
+        timerId = setTimeout(async function() {
+            await runTest();
+            scheduleNextTest();
+        }, TEST_INTERVAL);
+    }
+}
+
+// 重置并开始新一轮测试（先预热再正式测试）
+async function startNewTest() {
+    if (abortController) {
+        abortController.abort();
+    }
+    
+    clearTimeout(timerId);
+    timerId = null;
+    currentTestCount = 0;
+    successCount = 0;
+    history = [];
+    isTesting = false;
+
+    // 重置界面状态
+    avgLatencyEl.className = "avg-latency muted";
+    avgValueEl.textContent = "-- ms";
+    currentLatencyEl.className = "current-latency muted";
+    currentValueEl.textContent = "-- ms";
+    
+    minEl.textContent = "--";
+    maxEl.textContent = "--";
+    successRateEl.textContent = "--";
+    doneCountEl.textContent = "0";
+    progressBar.style.width = "0%";
+    startBtn.disabled = true;
+
+    // 先预热连接，再开始正式测试
+    await warmupConnection();
+    runTest();
+    scheduleNextTest();
+}
+
+// 页面可见性监听
+document.addEventListener("visibilitychange", function() {
+    isPageVisible = !document.hidden;
+    if (isPageVisible) {
+        if (currentTestCount < MAX_TEST_COUNT) {
+            runTest();
+            scheduleNextTest();
+        }
+    } else {
+        clearTimeout(timerId);
+        timerId = null;
+        if (abortController && isTesting) {
+            abortController.abort();
+        }
+        if (currentTestCount < MAX_TEST_COUNT) {
+            statusEl.className = "status loading";
+            statusEl.textContent = "已暂停（后台运行）";
+        }
+    }
+});
+
+startBtn.addEventListener("click", startNewTest);
+
+window.addEventListener("beforeunload", function() {
+    clearTimeout(timerId);
+    if (abortController) abortController.abort();
+});
+
+// 页面加载完成后，先预热再启动正式测试
+window.addEventListener("load", async function() {
+    await warmupConnection();
+    runTest();
+    scheduleNextTest();
+});
+</script>
+
+</body>
+</html>`, y = new Headers({
       "Content-Type": "text/html;charset=UTF-8",
       "Cache-Control": "public, max-age=3600, s-maxage=86400"
     });
