@@ -1,0 +1,87 @@
+# ---------------------------------------------
+# Cloudflare Workers / Wrangler
+# ---------------------------------------------
+# Wrangler 本地缓存、构建产物与本地 KV / D1 / R2 状态数据
+# (local dev state, cache and build output)
+.wrangler/
+.mf/
+worker-configuration.d.ts
+
+# 本地开发用环境变量文件（含密钥，切勿提交）
+# Local env / secret files
+.dev.vars
+.dev.vars.*
+.env
+.env.*
+!.env.example
+
+# 构建输出目录（如将来接入打包流程）
+# Build output
+dist/
+build/
+.vercel/
+.cache/
+
+# ---------------------------------------------
+# Node / 包管理
+# ---------------------------------------------
+node_modules/
+.pnpm-store/
+.yarn/cache/
+.yarn/install-state.gz
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ---------------------------------------------
+# 编辑器 / IDE
+# ---------------------------------------------
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.iml
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ---------------------------------------------
+# 操作系统
+# ---------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ---------------------------------------------
+# 日志 / 临时文件
+# ---------------------------------------------
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.bak
+*.orig
+*.rej
+
+# ---------------------------------------------
+# 备份与本地导出文件（KV / D1 备份等）
+# ---------------------------------------------
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+backup/
+backups/
+export/
+dist-backup/
