@@ -6000,6 +6000,11 @@ function hf(o = {}, e = {}) {
       box-shadow: none;
     }
 
+    .test-btn:focus-visible {
+      outline: 2px solid rgba(125, 211, 252, 0.85);
+      outline-offset: 3px;
+    }
+
     /* 醒目提示条 */
     .tip {
       margin-top: 22px;
@@ -6014,6 +6019,160 @@ function hf(o = {}, e = {}) {
       text-align: left;
     }
 
+    /* 更多内容入口（Telegram 频道） */
+    .channel-link {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 20px;
+      padding: 13px 14px;
+      border-radius: 16px;
+      overflow: hidden;
+      text-decoration: none;
+      text-align: left;
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.16), rgba(15, 23, 42, 0.6) 62%, rgba(15, 23, 42, 0.34));
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      box-shadow: 0 10px 30px rgba(2, 6, 23, 0.35), inset 0 1px 0 rgba(226, 232, 240, 0.06);
+      transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .channel-link::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(120% 170% at 6% -10%, rgba(56, 189, 248, 0.42), rgba(56, 189, 248, 0) 62%);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      pointer-events: none;
+    }
+
+    .channel-link:hover {
+      transform: translateY(-2px);
+      border-color: rgba(56, 189, 248, 0.55);
+      box-shadow: 0 16px 38px rgba(2, 6, 23, 0.45), 0 0 0 1px rgba(56, 189, 248, 0.16), inset 0 1px 0 rgba(226, 232, 240, 0.08);
+    }
+
+    .channel-link:hover::after {
+      opacity: 1;
+    }
+
+    .channel-link:focus-visible {
+      outline: 2px solid rgba(125, 211, 252, 0.9);
+      outline-offset: 3px;
+    }
+
+    .channel-icon {
+      position: relative;
+      z-index: 1;
+      flex: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      color: #ffffff;
+      background: linear-gradient(135deg, #3ab6ea, #1b8ec4);
+      box-shadow: 0 6px 16px rgba(55, 174, 226, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.32);
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .channel-link:hover .channel-icon {
+      transform: scale(1.04);
+      box-shadow: 0 8px 20px rgba(55, 174, 226, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.36);
+    }
+
+    .channel-icon svg {
+      display: block;
+      transform: translateX(-1px);
+    }
+
+    .channel-text {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .channel-title {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      color: #f1f5f9;
+    }
+
+    .channel-desc {
+      font-size: 12px;
+      line-height: 1.4;
+      color: #94a3b8;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .channel-handle {
+      color: #7dd3fc;
+      font-weight: 500;
+    }
+
+    .channel-cta {
+      position: relative;
+      z-index: 1;
+      flex: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      color: #7dd3fc;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.26);
+      transition: background 0.22s ease, border-color 0.22s ease, color 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .channel-cta svg {
+      display: block;
+      transition: transform 0.22s ease;
+    }
+
+    .channel-link:hover .channel-cta {
+      color: #ffffff;
+      background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+      border-color: rgba(125, 211, 252, 0.7);
+      box-shadow: 0 4px 12px rgba(56, 189, 248, 0.4);
+    }
+
+    .channel-link:hover .channel-cta svg {
+      transform: translateX(1.5px);
+    }
+
+    .channel-icon::after {
+      content: "";
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      box-shadow: 0 0 14px 2px rgba(56, 189, 248, 0.5);
+      opacity: 0.25;
+      animation: channel-breathe 3.6s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes channel-breathe {
+      0%,
+      100% {
+        opacity: 0.18;
+      }
+
+      50% {
+        opacity: 0.55;
+      }
+    }
+
     @media (max-width: 400px) {
       .card {
         padding: 30px 22px;
@@ -6026,7 +6185,52 @@ function hf(o = {}, e = {}) {
       .current-latency {
         font-size: 24px;
       }
+
+      .channel-link {
+        gap: 10px;
+        padding: 12px;
+      }
+
+      .channel-icon {
+        width: 34px;
+        height: 34px;
+      }
+
+      .channel-title {
+        font-size: 14px;
+      }
+
+      .channel-desc {
+        font-size: 11.5px;
+        white-space: normal;
+        overflow-wrap: break-word;
+      }
+
+      .channel-cta {
+        width: 24px;
+        height: 24px;
+      }
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      .channel-icon::after {
+        animation: none;
+      }
+
+      .channel-link,
+      .channel-icon,
+      .channel-cta,
+      .channel-cta svg {
+        transition: none;
+      }
+
+      .channel-link:hover,
+      .channel-link:hover .channel-icon,
+      .channel-link:hover .channel-cta svg {
+        transform: none;
+      }
+    }
+
   </style>
 </head>
 
@@ -6067,6 +6271,24 @@ function hf(o = {}, e = {}) {
 
     <!-- 醒目提示文案 -->
     <div class="tip">为获得最佳体验，请使用不同的网络环境进行测试，延迟较高证明该反代并不适用于你。</div>
+
+    <!-- Telegram 频道入口：点击在新窗口打开 -->
+    <a class="channel-link" href="https://t.me/MikuNaNChannel" target="_blank" rel="noopener noreferrer" aria-label="Telegram 频道：更多内容 @MikuNaNChannel">
+      <span class="channel-icon" aria-hidden="true">
+        <svg viewBox="0 0 448 512" width="16" height="18" fill="currentColor">
+          <path d="M446.7 98.6l-67.6 318.8c-5.1 22.5-18.4 28.1-37.3 17.5l-103-75.9-49.7 47.8c-5.5 5.5-10.1 10.1-20.7 10.1l7.4-104.9 190.9-172.5c8.3-7.4-1.8-11.5-12.9-4.1L117.8 284 16.2 252.2c-22.1-6.9-22.5-22.1 4.6-32.7L418.2 66.4c18.4-6.9 34.5 4.1 28.5 32.2z"/>
+        </svg>
+      </span>
+      <span class="channel-text">
+        <span class="channel-title">Telegram 频道</span>
+        <span class="channel-desc">更多内容 · <span class="channel-handle">@MikuNaNChannel</span></span>
+      </span>
+      <span class="channel-cta" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9.2 6.6 14.6 12 9.2 17.4"/>
+        </svg>
+      </span>
+    </a>
   </div>
 
   <script>
